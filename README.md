@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-MIT-orange)](https://github.com/VicBilibily/GCMP/blob/main/LICENSE)
 
 通过集成国内主流原生大模型提供商，为开发者提供更加丰富、更适合本土需求的 AI 编程助手选择。
-目前已内置支持 智谱AI、MiniMax、MoonshotAI、DeepSeek、阿里云百炼、快手万擎、火山方舟、腾讯云、Xiaomi MiMo 等**原生大模型**提供商。
+目前已内置支持 智谱AI、MiniMax、MoonshotAI、DeepSeek、阿里云百炼、快手万擎、火山方舟、腾讯云、Xiaomi MiMo、百度千帆 等**原生大模型**提供商。
 此外，扩展插件已适配支持 OpenAI 与 Anthropic 的 API 接口兼容模型，支持自定义接入任何提供兼容接口的第三方**云服务模型**。
 
 #### 📢 公告
@@ -33,7 +33,7 @@
 
 ### [**智谱AI**](https://bigmodel.cn/)
 
-- [**编程套餐**](https://bigmodel.cn/glm-coding)：**GLM-5V-Turbo**、**GLM-5.1**、**GLM-5-Turbo**、**GLM-5**、**GLM-4.7**、**GLM-4.6**、**GLM-4.6V**、**GLM-4.5-Air**
+- [**编程套餐**](https://bigmodel.cn/glm-coding)：**GLM-5.1**、**GLM-5V-Turbo**、**GLM-5-Turbo**、**GLM-4.7**、**GLM-4.6**、**GLM-4.6V**、**GLM-4.5-Air**
     - **用量查询**：已支持状态栏显示周期剩余用量，可查看 GLM Coding Plan 用量信息。
 - **按量计费**：**GLM-5.1**、**GLM-5V-Turbo**、**GLM-5-Turbo**、**GLM-5**、**GLM-4.7**、**GLM-4.7-FlashX**、**GLM-4.6**、**GLM-4.6V**、**GLM-4.5-Air**
 - **免费模型**：**GLM-4.6V-Flash**、**GLM-4.7-Flash**
@@ -65,9 +65,10 @@
 
 ### [**阿里云百炼**](https://bailian.console.aliyun.com/)
 
-- [**Coding Plan 套餐**](https://www.aliyun.com/benefit/scene/codingplan)
+- [**Coding Plan**](https://www.aliyun.com/benefit/scene/codingplan)
     - 推荐模型：**Qwen3.6-Plus**、**Kimi-K2.5**、**GLM-5**、**MiniMax-M2.5**
     - 更多模型：**Qwen3.5-Plus**、**Qwen3-Max**、**Qwen3-Coder-Next**、**Qwen3-Coder-Plus**、**GLM-4.7**
+- [**Token Plan**](https://www.aliyun.com/benefit/scene/tokenplan)：**Qwen3.6-Plus**、**GLM-5**、**MiniMax-M2.5**、**DeepSeek-V3.2**
 - **通义千问系列**：**Qwen3.6-Plus**、**Qwen3.5-Plus**、**Qwen3.5-Flash**、**Qwen3-Max**、**Qwen3-VL-Plus**、**Qwen3-VL-Flash**、**Qwen-Plus**、**Qwen-Flash**
     - **搜索功能**：集成 [联网搜索MCP](https://bailian.console.aliyun.com/cn-beijing/?tab=doc#/doc/?type=model&url=3023217) 工具（2000次/月），支持通过 `#bailianWebSearch` 进行联网搜索。（使用[阿里云百炼ApiKey](https://bailian.console.aliyun.com/cn-beijing/?tab=model#/api-key)而非编程套餐的ApiKey）
 
@@ -81,24 +82,30 @@
 
 - [**Coding Plan 套餐**](https://www.volcengine.com/activity/codingplan)：
     - 豆包模型：**Doubao-Seed-2.0-Code**、**Doubao-Seed-Code**、**Doubao-Seed-2.0-lite**、**Doubao-Seed-2.0-pro**
-    - 开源模型：**MiniMax-M2.5**、**Kimi-K2.5**、**GLM-4.7**、**Deepseek v3.2**
-- **豆包系列**：**Doubao-Seed-2.0**(lite/mini/pro/Code)、**Doubao-Seed-1.8**、**Doubao-Seed-1.6**、**Doubao-Seed-1.6-Lite**
+    - 开源模型：**GLM-5.1**、**Kimi-K2.6**、**MiniMax-M2.7**、**MiniMax-M2.5**、**Kimi-K2.5**、**GLM-4.7**、**Deepseek v3.2**
+- **豆包系列**：**Doubao-Seed-2.0**(lite/mini/pro/Code)、**Doubao-Seed-1.8**、**Doubao-Seed-1.6**
 - **协作奖励计划**：**GLM-4.7**、**DeepSeek-V3.2**、**DeepSeek-V3.1-terminus**
 
 ### [**腾讯云**](https://cloud.tencent.com/product/hunyuan)
 
-- [**Coding Plan**](https://cloud.tencent.com/act/pro/codingplan) / [**Token Plan**](https://cloud.tencent.com/act/pro/tokenplan)：
-    - 混元模型：**Tencent HY 2.0 Instruct**、**Tencent HY 2.0 Think**、**Hunyuan-T1**、**Hunyuan-TurboS**
-    - 开源模型：**GLM-5**、**Kimi-K2.5**、**MiniMax-M2.5**
-- **DeepSeek API**：**DeepSeek-V3.2**
-- **密钥配置**：腾讯云API密钥分为 [腾讯云付费模型 API Key](https://hunyuan.cloud.tencent.com/#/app/apiKeyManage)、[Coding Plan 专用 API Key](https://hunyuan.cloud.tencent.com/#/app/subscription)、[Token Plan 专用 API Key](https://hunyuan.cloud.tencent.com/#/app/tokenplan)、[DeepSeek 专用 API Key](https://console.cloud.tencent.com/lkeap/api)，需要进入正确的密钥获取界面生成密钥。
+- [**Coding Plan**](https://console.cloud.tencent.com/tokenhub/codingplan) / [**Token Plan**](https://console.cloud.tencent.com/tokenhub/tokenplan)：
+    - 混元模型：**Tencent HY 2.0 Instruct**、**Tencent HY 2.0 Think**
+    - 开源模型：**GLM-5**、**Kimi-K2.5**、**MiniMax-M2.5**、**DeepSeek-V3.2**
+    - 计费模型：**GLM-5.1**、**GLM-5-Turbo**、**MiniMax-M2.7**、**Kimi-K2.6**
+- **密钥配置**：腾讯云API密钥分为 [腾讯云付费模型 API Key](https://hunyuan.cloud.tencent.com/#/app/apiKeyManage)、[Coding Plan 专用 API Key](https://console.cloud.tencent.com/tokenhub/codingplan)、[Token Plan 专用 API Key](https://console.cloud.tencent.com/tokenhub/tokenplan)、[DeepSeek 专用 API Key](https://console.cloud.tencent.com/lkeap/api)、[TokenHub 付费 API Key](https://console.cloud.tencent.com/tokenhub/apikey)，需要进入正确的密钥获取界面生成密钥。
 
 ### [**Xiaomi MiMo**](https://platform.xiaomimimo.com/#/console/api-keys)
 
-- 按量计费：**MiMo-V2-Pro**、**MiMo-V2-Omni**、**MiMo-V2-Flash**
-- [**Token Plan**](https://platform.xiaomimimo.com/#/token-plan)：**MiMo-V2-Pro**、**MiMo-V2-Omni**
+- 按量计费：**MiMo-V2.5-Pro**、**MiMo-V2.5**、**MiMo-V2-Pro**、**MiMo-V2-Omni**、**MiMo-V2-Flash**
+- [**Token Plan**](https://platform.xiaomimimo.com/#/token-plan)：**MiMo-V2.5-Pro**、**MiMo-V2.5**、**MiMo-V2-Pro**、**MiMo-V2-Omni**
     - [区域集群](https://platform.xiaomimimo.com/#/docs/tokenplan/subscription?target=快速指南)：可切换选择`中国集群(cn)`、`新加坡集群(sgp)`、`欧洲集群(ams)`，按[订阅管理](https://platform.xiaomimimo.com/#/console/plan-manage)页面展示为准。
 - **密钥配置**：支持设置 [Xiaomi MiMo API Key](https://platform.xiaomimimo.com/#/console/api-keys) 与 [Token Plan 专用 API Key](https://platform.xiaomimimo.com/#/console/plan-manage) 分别设置。
+
+### [**百度千帆**](https://cloud.baidu.com/product-s/qianfan_home)
+
+- **按量计费**：**DeepSeek-V3.2**、**GLM-5**、**GLM-5.1**、**Kimi-K2.5**、**MiniMax-M2.5**、**ERNIE-5.0**
+- [**Coding Plan 编程套餐**](https://cloud.baidu.com/product/codingplan)：**DeepSeek-V3.2**、**GLM-5**、**Kimi-K2.5**、**MiniMax-M2.5**
+- **密钥配置**：支持设置 [百度千帆 API Key](https://console.bce.baidu.com/qianfan/ais/console/apiKey) 与 [Coding Plan 专用 API Key](https://console.bce.baidu.com/qianfan/resource/subscribe) 分别设置。
 
 ### 实验性支持 CLI 认证提供商
 
@@ -373,7 +380,7 @@ FIM 和 NES 补全都使用单独的模型配置，可以分别通过 `gcmp.fimC
 > - **手动触发**（按 `Alt+/`）：直接调用 NES，不发起 FIM
 > - **模式切换**（按 `Shift+Alt+/`）：在自动/手动间切换（仅影响 NES）
 
-#### [MistralAI Coding](https://console.mistral.ai/codestral) 示例配置
+#### [MistralAI Coding](https://console.mistral.ai/codestral) FIM 配置示例
 
 ```json
 {
@@ -401,16 +408,6 @@ FIM 和 NES 补全都使用单独的模型配置，可以分别通过 `gcmp.fimC
         "model": "codestral-latest",
         "extraBody": { "code_annotations": null },
         "maxTokens": 100
-    },
-    "gcmp.nesCompletion.enabled": false,
-    "gcmp.nesCompletion.debounceMs": 500,
-    "gcmp.nesCompletion.timeoutMs": 10000,
-    "gcmp.nesCompletion.manualOnly": false,
-    "gcmp.nesCompletion.modelConfig": {
-        "provider": "mistral",
-        "baseUrl": "https://codestral.mistral.ai/v1",
-        "model": "codestral-latest",
-        "maxTokens": 200
     }
 }
 ```

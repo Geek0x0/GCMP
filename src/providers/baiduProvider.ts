@@ -1,8 +1,7 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Dashscope (阿里云百炼) 专用 Provider
- *  为 Dashscope 提供商提供多密钥管理和配置向导功能
- *--------------------------------------------------------------------------------------------*/
-
+﻿/*-----------------------------------------------------------------
+ * 百度千帆专用 Provider
+ * 为百度千帆提供商提供多密钥管理和专属配置向导功能
+ *--------------------------------------------------------------------------------*/
 import * as vscode from 'vscode';
 import {
     CancellationToken,
@@ -15,87 +14,85 @@ import {
 } from 'vscode';
 import { GenericModelProvider } from './genericModelProvider';
 import { ProviderConfig, ModelConfig } from '../types/sharedTypes';
-import { Logger, ApiKeyManager, DashscopeWizard } from '../utils';
+import { Logger, ApiKeyManager } from '../utils';
+import { BaiduWizard } from '../utils/baiduWizard';
 import { TokenUsagesManager } from '../usages/usagesManager';
-
-export class DashscopeProvider extends GenericModelProvider implements LanguageModelChatProvider {
+/**
+ * 百度千帆专用模型提供商类
+ * 继承 GenericModelProvider，添加多密钥管理和配置向导功能
+ */
+export class BaiduProvider extends GenericModelProvider implements LanguageModelChatProvider {
     constructor(context: vscode.ExtensionContext, providerKey: string, providerConfig: ProviderConfig) {
         super(context, providerKey, providerConfig);
     }
-
+    /**
+     * 静态工厂方法 - 创建并激活百度千帆提供商
+     */
     static createAndActivate(
         context: vscode.ExtensionContext,
         providerKey: string,
         providerConfig: ProviderConfig
-    ): { provider: DashscopeProvider; disposables: vscode.Disposable[] } {
+    ): { provider: BaiduProvider; disposables: vscode.Disposable[] } {
         Logger.trace(`${providerConfig.displayName} 专用模型扩展已激活!`);
-
-        const provider = new DashscopeProvider(context, providerKey, providerConfig);
+        // 创建提供商实例
+        const provider = new BaiduProvider(context, providerKey, providerConfig);
+        // 注册语言模型聊天提供商
         const providerDisposable = vscode.lm.registerLanguageModelChatProvider(`gcmp.${providerKey}`, provider);
-
-        // 普通 API Key
+        // 注册设置普通 API 密钥命令
         const setApiKeyCommand = vscode.commands.registerCommand(`gcmp.${providerKey}.setApiKey`, async () => {
-            await DashscopeWizard.setNormalApiKey(providerConfig.displayName, providerConfig.apiKeyTemplate);
+            await BaiduWizard.setNormalApiKey(providerConfig.displayName, providerConfig.apiKeyTemplate);
+            // API 密钥变更后清除缓存
             await provider.modelInfoCache?.invalidateCache(providerKey);
+            // 触发模型信息变更事件
             provider._onDidChangeLanguageModelChatInformation.fire();
         });
-
-        // Coding Plan 专用 API Key
-        const setCodingPlanApiKeyCommand = vscode.commands.registerCommand(
+        // 注册设置 Coding Plan 专用密钥命令
+        const setCodingKeyCommand = vscode.commands.registerCommand(
             `gcmp.${providerKey}.setCodingPlanApiKey`,
             async () => {
-                await DashscopeWizard.setCodingPlanApiKey(providerConfig.displayName, providerConfig.codingKeyTemplate);
-                await provider.modelInfoCache?.invalidateCache('dashscope-coding');
+                await BaiduWizard.setCodingPlanApiKey(providerConfig.displayName, providerConfig.codingKeyTemplate);
+                // API 密钥变更后清除缓存
+                await provider.modelInfoCache?.invalidateCache('baidu-coding');
+                // 触发模型信息变更事件
                 provider._onDidChangeLanguageModelChatInformation.fire();
             }
         );
-
-        // Token Plan 专用 API Key
-        const setTokenPlanApiKeyCommand = vscode.commands.registerCommand(
-            `gcmp.${providerKey}.setTokenPlanApiKey`,
-            async () => {
-                await DashscopeWizard.setTokenPlanApiKey(providerConfig.displayName, providerConfig.tokenKeyTemplate);
-                await provider.modelInfoCache?.invalidateCache('dashscope-token');
-                provider._onDidChangeLanguageModelChatInformation.fire();
-            }
-        );
-
+        // 注册配置向导命令
         const configWizardCommand = vscode.commands.registerCommand(`gcmp.${providerKey}.configWizard`, async () => {
             Logger.info(`启动 ${providerConfig.displayName} 配置向导`);
-            await DashscopeWizard.startWizard(
+            await BaiduWizard.startWizard(
                 providerConfig.displayName,
                 providerConfig.apiKeyTemplate,
-                providerConfig.codingKeyTemplate,
-                providerConfig.tokenKeyTemplate
+                providerConfig.codingKeyTemplate
             );
             await provider.modelInfoCache?.invalidateCache(providerKey);
             provider._onDidChangeLanguageModelChatInformation.fire();
         });
-
-        const disposables = [
-            providerDisposable,
-            setApiKeyCommand,
-            setCodingPlanApiKeyCommand,
-            setTokenPlanApiKeyCommand,
-            configWizardCommand
-        ];
-        disposables.forEach(d => context.subscriptions.push(d));
+        const disposables = [providerDisposable, setApiKeyCommand, setCodingKeyCommand, configWizardCommand];
+        disposables.forEach(disposable => context.subscriptions.push(disposable));
         return { provider, disposables };
     }
-
+    /**
+     * 获取模型对应的 provider key（考虑 provider 字段和默认值）
+     */
     private getProviderKeyForModel(modelConfig: ModelConfig): string {
-        return modelConfig.provider || this.providerKey;
+        // 优先使用模型特定的 provider 字段
+        if (modelConfig.provider) {
+            return modelConfig.provider;
+        }
+        // 否则使用提供商默认的 provider key
+        return this.providerKey;
     }
-
+    /**
+     * 获取模型对应的密钥，确保存在有效密钥
+     * @param modelConfig 模型配置
+     * @returns 返回可用的 API 密钥
+     */
     private async ensureApiKeyForModel(modelConfig: ModelConfig): Promise<string> {
         const providerKey = this.getProviderKeyForModel(modelConfig);
-        const isCodingPlan = providerKey === 'dashscope-coding';
-        const isTokenPlan = providerKey === 'dashscope-token';
-        const keyType =
-            isCodingPlan ? 'Coding Plan 专用'
-            : isTokenPlan ? 'Token Plan 专用'
-            : '普通';
-
+        const isCodingPlan = providerKey === 'baidu-coding';
+        const keyType = isCodingPlan ? 'Coding Plan 专用' : '普通';
+        // 检查是否已有密钥
         const hasApiKey = await ApiKeyManager.hasValidApiKey(providerKey);
         if (hasApiKey) {
             const apiKey = await ApiKeyManager.getApiKey(providerKey);
@@ -103,32 +100,32 @@ export class DashscopeProvider extends GenericModelProvider implements LanguageM
                 return apiKey;
             }
         }
-
+        // 密钥不存在，直接进入设置流程（不弹窗确认）
         Logger.warn(`模型 ${modelConfig.name} 缺少 ${keyType} API 密钥，进入设置流程`);
-
         if (isCodingPlan) {
-            await DashscopeWizard.setCodingPlanApiKey(
+            // Coding Plan 模型直接进入专用密钥设置
+            await BaiduWizard.setCodingPlanApiKey(
                 this.providerConfig.displayName,
                 this.providerConfig.codingKeyTemplate
             );
-        } else if (isTokenPlan) {
-            await DashscopeWizard.setTokenPlanApiKey(
-                this.providerConfig.displayName,
-                this.providerConfig.tokenKeyTemplate
-            );
         } else {
-            await DashscopeWizard.setNormalApiKey(this.providerConfig.displayName, this.providerConfig.apiKeyTemplate);
+            // 普通模型直接进入普通密钥设置
+            await BaiduWizard.setNormalApiKey(this.providerConfig.displayName, this.providerConfig.apiKeyTemplate);
         }
-
+        // 重新检查密钥是否设置成功
         const apiKey = await ApiKeyManager.getApiKey(providerKey);
         if (apiKey) {
             Logger.info(`${keyType}密钥设置成功`);
             return apiKey;
         }
-
+        // 用户未设置或设置失败
         throw new Error(`${this.providerConfig.displayName}: 用户未设置 ${keyType} API 密钥`);
     }
-
+    /**
+     * 重写：获取模型信息 - 添加密钥检查
+     * 只要有任意密钥存在就返回所有模型，不进行过滤
+     * 具体的密钥验证在实际使用时（provideLanguageModelChatResponse）进行
+     */
     override async provideLanguageModelChatInformation(
         options: PrepareLanguageModelChatModelOptions,
         _token: CancellationToken
@@ -137,39 +134,42 @@ export class DashscopeProvider extends GenericModelProvider implements LanguageM
             // 如果请求中包含 configuration，不返回模型列表
             return [];
         }
-
+        // 检查是否有任意密钥
         const hasNormalKey = await ApiKeyManager.hasValidApiKey(this.providerKey);
-        const hasCodingKey = await ApiKeyManager.hasValidApiKey('dashscope-coding');
-        const hasTokenPlanKey = await ApiKeyManager.hasValidApiKey('dashscope-token');
-        const hasAnyKey = hasNormalKey || hasCodingKey || hasTokenPlanKey;
-
+        const hasCodingKey = await ApiKeyManager.hasValidApiKey('baidu-coding');
+        const hasAnyKey = hasNormalKey || hasCodingKey;
+        // 如果是静默模式且没有任何密钥，直接返回空列表
         if (options.silent && !hasAnyKey) {
             Logger.debug(`${this.providerConfig.displayName}: 静默模式下，未检测到任何密钥，返回空模型列表`);
             return [];
         }
-
+        // 非静默模式：启动配置向导
         if (!options.silent) {
-            await DashscopeWizard.startWizard(
+            await BaiduWizard.startWizard(
                 this.providerConfig.displayName,
                 this.providerConfig.apiKeyTemplate,
-                this.providerConfig.codingKeyTemplate,
-                this.providerConfig.tokenKeyTemplate
+                this.providerConfig.codingKeyTemplate
             );
-
+            // 重新检查是否设置了密钥
             const normalKeyValid = await ApiKeyManager.hasValidApiKey(this.providerKey);
-            const codingKeyValid = await ApiKeyManager.hasValidApiKey('dashscope-coding');
-            const tokenPlanKeyValid = await ApiKeyManager.hasValidApiKey('dashscope-token');
-            if (!normalKeyValid && !codingKeyValid && !tokenPlanKeyValid) {
+            const codingKeyValid = await ApiKeyManager.hasValidApiKey('baidu-coding');
+            // 如果用户仍未设置任何密钥，返回空列表
+            if (!normalKeyValid && !codingKeyValid) {
                 Logger.warn(`${this.providerConfig.displayName}: 用户未设置任何密钥，返回空模型列表`);
                 return [];
             }
         }
-
-        const models = this.providerConfig.models.map(m => this.modelConfigToInfo(m));
-
+        // 返回所有模型，不进行过滤
+        // 具体的密钥验证会在用户选择模型后的 provideLanguageModelChatResponse 中进行
+        Logger.debug(`${this.providerConfig.displayName}: 返回全部 ${this.providerConfig.models.length} 个模型`);
+        // 将配置中的模型转换为 VS Code 所需的格式
+        const models = this.providerConfig.models.map(model => this.modelConfigToInfo(model));
         return models;
     }
-
+    /**
+     * 重写：提供语言模型聊天响应 - 添加请求前密钥确保机制
+     * 在处理请求前确保对应的密钥存在
+     */
     async provideLanguageModelChatResponse(
         model: LanguageModelChatInformation,
         messages: Array<LanguageModelChatMessage>,
@@ -184,27 +184,20 @@ export class DashscopeProvider extends GenericModelProvider implements LanguageM
             Logger.error(errorMessage);
             throw new Error(errorMessage);
         }
-
+        // 请求前：确保模型对应的密钥存在
+        // 这会在没有密钥时弹出设置对话框
         const providerKey = this.getProviderKeyForModel(modelConfig);
         const apiKey = await this.ensureApiKeyForModel(modelConfig);
         if (!apiKey) {
-            const keyType =
-                providerKey === 'dashscope-coding' ? 'Coding Plan 专用'
-                : providerKey === 'dashscope-token' ? 'Token Plan 专用'
-                : '普通';
+            const keyType = providerKey === 'baidu-coding' ? 'Coding Plan 专用' : '普通';
             throw new Error(`${this.providerConfig.displayName}: 无效的 ${keyType} API 密钥`);
         }
-
-        const keyLabel =
-            providerKey === 'dashscope-coding' ? 'Coding Plan'
-            : providerKey === 'dashscope-token' ? 'Token Plan'
-            : '普通';
         Logger.debug(
-            `${this.providerConfig.displayName}: 即将处理请求，使用 ${keyLabel} 密钥 - 模型: ${modelConfig.name}`
+            `${this.providerConfig.displayName}: 即将处理请求，使用 ${providerKey === 'baidu-coding' ? 'Coding Plan' : '普通'} 密钥 - 模型: ${modelConfig.name}`
         );
-
+        // 计算输入 token 数量并更新状态栏
         const totalInputTokens = await this.updateContextUsageStatusBar(model, messages, modelConfig, options);
-
+        // === Token 统计: 记录预估输入 token ===
         const usagesManager = TokenUsagesManager.instance;
         let requestId: string | null = null;
         try {
@@ -218,11 +211,12 @@ export class DashscopeProvider extends GenericModelProvider implements LanguageM
         } catch (err) {
             Logger.warn('记录预估Token失败，继续执行请求:', err);
         }
-
+        // 根据模型的 sdkMode 选择使用的 handler
+        // 注：此处不调用 super.provideLanguageModelChatResponse，而是直接处理
+        // 避免双重密钥检查，因为我们已经在 ensureApiKeyForModel 中检查过了
         const sdkMode = modelConfig.sdkMode || 'openai';
         const sdkName = this.getSdkDisplayName(sdkMode);
         Logger.info(`${this.providerConfig.displayName} Provider 开始处理请求 (${sdkName}): ${modelConfig.name}`);
-
         try {
             await this.executeModelRequest(
                 model,
@@ -235,9 +229,15 @@ export class DashscopeProvider extends GenericModelProvider implements LanguageM
                 providerKey
             );
         } catch (error) {
+            const errorMessage = `错误: ${error instanceof Error ? error.message : '未知错误'}`;
+            Logger.error(errorMessage);
+            // === Token 统计: 更新失败状态 ===
             if (requestId) {
                 try {
-                    await usagesManager.updateActualTokens({ requestId, status: 'failed' });
+                    await usagesManager.updateActualTokens({
+                        requestId,
+                        status: 'failed'
+                    });
                 } catch (err) {
                     Logger.warn('更新Token统计失败状态失败:', err);
                 }

@@ -2,6 +2,85 @@
 
 本文档记录了 GCMP (AI Chat Models) 扩展的最近主要更改。
 
+## [0.21.20] - 2026-04-23
+
+### 新增
+
+- **Xiaomi MiMo**：新增模型 **MiMo-V2.5-Pro**、**MiMo-V2.5**
+
+## [0.21.19] - 2026-04-22
+
+### 优化
+
+- **FIM 补全请求体解析**：重构 FIM 补全请求体解析逻辑，支持 `options.body`（字符串格式）与 `options.json`（对象格式）双模式，提升不同调用路径的兼容性
+- **FIM SSE 流处理**：优化 FIM 补全的 SSE 流式响应处理，新增 delta.content 到 text 字段的自动转换，兼容返回 Chat Completion chunk 格式的 FIM 接口
+- **Commit 模型选择**：优化 Commit 消息生成模型选择逻辑，支持 `autoPrefixModelId` 模式下对 provider 字段覆盖模型的正确识别与查询 [#136](https://github.com/VicBilibily/GCMP/issues/136)
+
+### 调整
+
+- **VS Code 兼容性**：VS Code 引擎版本要求 `>=1.116.0`，同步升级 `@vscode/chat-lib` 至 0.44.1、`@types/vscode` 至 1.116.0
+
+## [0.21.18] - 2026-04-22
+
+### 新增
+
+- **火山方舟**：新增 Coding Plan 模型 **Kimi-K2.6**、**GLM-5.1**
+
+## [0.21.17] - 2026-04-21
+
+### 新增
+
+- **百度千帆**：新增百度千帆大模型平台提供商支持（[#129](https://github.com/VicBilibily/GCMP/issues/129)）
+- **阿里云百炼 Token Plan**：新增阿里云百炼 Token Plan 支持
+
+### 优化
+
+- **Dashscope MCP 连接管理**：优化 MCP 客户端连接管理与重连策略
+- **模型配置架构**：
+    - 移除已废弃的 `endOfLife` 标记及相关 Schema 定义
+    - 统一移除模型变体定义，简化配置结构
+    - 优化模型覆盖逻辑与编辑器状态管理
+
+## [0.21.16] - 2026-04-20
+
+### 新增
+
+- **腾讯云 TokenHub**：新增腾讯云大模型服务平台 TokenHub 按量付费模型接入
+    - 模型列表：GLM-5.1、GLM-5-Turbo、GLM-5、DeepSeek-V3.2、Kimi-K2.5、MiniMax-M2.7、MiniMax-M2.5
+
+### 移除
+
+- **智谱AI CodingPlan**：移除已被自动路由到 `GLM-5.1` 的 `GLM-5` 模型
+- **腾讯云**：移除即将下线的混元系列模型
+
+## [0.21.15] - 2026-04-17
+
+### 修复
+
+- **Responses API 事件去重**：修复 `response.output_text.done` / `response.refusal.done` / `reasoning_text.done` 等事件的去重逻辑，改为按输出项+内容索引粒度追踪，避免跨 output item 误判导致后续文本被吞掉
+- **Responses API 推理摘要去重**：将推理摘要的 delta/done 去重从全局布尔标记改为按 item_id 粒度追踪，与官方实现对齐
+- **Responses API 工具调用判重**：统一使用 `item.id`（而非 `call_id`）作为工具调用缓冲区的判重索引，修复部分网关中 `call_id` 与 `item.id` 不一致时工具调用被重复上报或遗漏的问题
+- **Responses API 工具调用兜底**：`response.function_call_arguments.done` 事件不再强制要求 `output_item.added` 先行到达；当网关未发送 `added` 事件时，退回使用 `item_id` 和 `done` 事件中的字段完成工具调用
+- **SSE 控制字符兼容**：新增 JSON 字符串内控制字符（U+0000–U+001F）自动转义，修复部分网关在文本内容中直接输出原始换行/制表符导致 OpenAI SDK JSON 解析失败的问题
+
+### 优化
+
+- **SSE 预处理重构**：将 SSE 逐行预处理逻辑从正则批量替换重构为 `processSSELine` 逐行处理函数，统一覆盖正常 chunk 和 EOF 残留行的修复路径，降低边界场景下的遗漏风险
+
+## [0.21.14] - 2026-04-15
+
+### 优化
+
+- **智谱AI 重试机制**：智谱AI 现在会自动重试服务器过载和临时通讯错误（如 `12xx`、`13xx` 错误码），减少请求失败率
+- **限流错误识别**：`RetryManager` 增强 429/529 限流错误的识别能力，新增对 `rate limit`、`temporarily overloaded`、`访问量过大` 等多种错误消息的匹配
+- **用量统计离群值过滤**：优化 Token 用量统计中的 MAD（中位数绝对偏差）阈值参数，更严格地过滤极端离群值，提升统计准确性
+
+## [0.21.13] - 2026-04-15
+
+### 修复
+
+- **工具调用去重**：[#120](https://github.com/VicBilibily/GCMP/pull/120) 修复当 VS Code 重复发送相同 `callId` 的 `tool_call` / `tool_result` 时，OpenAI 兼容接口报错的问题。现在自动跳过重复的工具调用，并记录警告日志
+
 ## [0.21.12] - 2026-04-14
 
 ### 新增
